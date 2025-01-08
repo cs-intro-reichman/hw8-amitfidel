@@ -2,7 +2,7 @@
  *  a list of user names that s/he follows, and the list's size. */
  public class User {
 
-    // Maximum number of users that a user can follow
+    // Maximum number of users that a user can follo
     static int maxfCount = 10;
 
     private String name;       // name of this user

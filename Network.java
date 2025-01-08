@@ -4,7 +4,7 @@ public class Network {
 
     // Fields
     private User[] users;  // the users in this network (an array of User objects)
-    private int userCount; // actual number of users in this network
+    private int userCount; // actual number of users in this networ
 
     /** Creates a network with a given maximum number of users. */
     public Network(int maxUserCount) {
