@@ -28,7 +28,7 @@ public class Network {
     public User getUser(String name) {
         for(int i=0;i<userCount;i++)
         {
-            if(users[i].getName()==name)
+            if(users[i].getName().equals(name))
             return users[i];
         }
         return null;
@@ -39,12 +39,19 @@ public class Network {
     *  If the given name is already a user in this network, does nothing and returns false;
     *  Otherwise, creates a new user with the given name, adds the user to this network, and returns true. */
     public boolean addUser(String name) {
-        if(this.userCount==users.length||this.getUser(name)!=null)
+
+        if(userCount >= users.length){
+            return false;
+        }
+
+        if(getUser(name) == null){
+            users[userCount] = new User(name);
+            userCount++;
+            return true;
+        }
+
+        
         return false;
-        User oneUp=new User(name);
-        users[userCount]=oneUp;
-        userCount++;
-        return true;
     }
 
     /** Makes the user with name1 follow the user with name2. If successful, returns true.
@@ -58,66 +65,82 @@ public class Network {
     
     /** For the user with the given name, recommends another user to follow. The recommended user is
      *  the user that has the maximal mutual number of followees as the user with the given name. */
-    public String recommendWhoToFollow(String name) 
-    {
-        int max=0;
-        int count=0;
-        User mostRecommendedUserToFollow = null;
-        for (int i = 0; i <userCount; i++) {
-            if (users[i].getName()==name)
-                continue;
-            
-            for (int j = 0; j <userCount; j++) 
-            {
-                if(users[i].follows(users[j].getName())&&getUser(name).follows(users[j].getName()))
-                count++;
-            }
-            if (count>max)
-            {
-                max=count;
-                mostRecommendedUserToFollow=users[i];
-            }
-            count=0;
+    public String recommendWhoToFollow(String name) {
+                   
+        User user = getUser(name);
+   
+        if (user == null) {
+            return null;        
         }
-        return mostRecommendedUserToFollow.getName();
+
+        String recommend = null;
+        int maxMutual = 0;
+
+        for (int i = 0; i < userCount; i++) 
+        {
+            User current = users[i];
+
+            if(current.getName().equals(name) || user.follows(current.getName()))
+                continue;
+
+            int mutualCount = user.countMutual(current);
+            if (maxMutual < mutualCount)
+            {
+                maxMutual = mutualCount;
+                recommend = current.getName();
+            }
+        }
+        return recommend;
     }
+
 
     /** Computes and returns the name of the most popular user in this network: 
      *  The user who appears the most in the follow lists of all the users. */
-    public String mostPopularUser() {
-        User mostPopular = users[0];
-        for (int i = 1; i <userCount; i++) 
-        {
-            if(followeeCount(users[i-1].getName())<followeeCount(users[i].getName()))
+        public String mostPopularUser() {
+
+            if (userCount == 0) 
+                return null; 
+            String supaStar = users[0].getName();
+            int followed = followeeCount(supaStar);
+    
+            for(int i = 1; i < userCount; i++)
             {
-                mostPopular=users[i];
+                if(followeeCount(users[i].getName()) > followed)
+                {
+                    followed = followeeCount(users[i].getName());
+                    supaStar = users[i].getName();
+                }
             }
+            return supaStar;
         }
-        return mostPopular.getName();
-    }
 
     /** Returns the number of times that the given name appears in the follows lists of all
      *  the users in this network. Note: A name can appear 0 or 1 times in each list. */
-    private int followeeCount(String name) {
-        int counter=0;
-        for (int i = 0; i <userCount; i++) 
+    private int followeeCount(String name) 
+    {        
+        int count = 0;
+        for(int i = 0; i < userCount; i++)
         {
-            if (users[i].getName()==name)
-                continue;
-            if (users[i].follows(name))
-            counter++;
+            if(users[i].follows(name))
+                count++;
         }
-        return counter;
+        return count;
     }
 
     // Returns a textual description of all the users in this network, and who they follow.
-    public String toString() {
-        String list="";
+    @Override
+    public String toString() 
+    {
+        if (userCount == 0) 
+            return "Network:"; // Correct for an empty network
+    
+        StringBuilder description = new StringBuilder("Network:\n");
+    
+        // Iterate through all users
         for (int i = 0; i < userCount; i++) 
         {
-          list+=users[i].toString();
-          list+="\n";
+            description.append(users[i].toString().trim()).append("\n"); // Append each user's description with newline
         }
-       return list;
+        return description.toString().trim(); // Trim the final newline
     }
 }
